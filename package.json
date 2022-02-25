@@ -95,5 +95,8 @@
          "yarn workspace @scaffold-eth/hardhat format",
          "yarn workspace @scaffold-eth/hardhat solhint --fix"
       ]
+   },
+   "dependencies": {
+      "@emotion/react": "^11.8.1"
    }
 }

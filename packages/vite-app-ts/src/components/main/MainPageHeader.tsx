@@ -5,7 +5,6 @@ import { useGasPrice } from 'eth-hooks';
 import { useEthersContext } from 'eth-hooks/context';
 import React, { FC, ReactElement } from 'react';
 
-import { FaucetHintButton } from '~~/components/common/FaucetHintButton';
 import { IScaffoldAppProviders } from '~~/components/main/hooks/useScaffoldAppProviders';
 import { getNetworkInfo } from '~~/functions';
 
@@ -33,21 +32,21 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
   const left = (
     <>
       <div>
+        <img
+          src="https://uploads.codesandbox.io/uploads/user/ec99cf90-9270-41c2-9b72-7cb10eee778e/WSE8-FlyWheelLogo2.png"
+          alt="logo"
+          style={{
+            width: '10em',
+            height: '10em',
+            display: 'inline-block',
+            float: 'left',
+            padding: '5px',
+            margin: '5px',
+          }}
+        />
         <PageHeader
-          title="🏭 Scaffold-Eth"
-          subTitle={
-            <span>
-              v2.1 - [
-              <a href="https://youtu.be/aYMj00JoIug" target="_blank" rel="noreferrer">
-                <span style={{ marginRight: 4 }}>🎥 </span> 8min speed run
-              </a>
-              ] - [
-              <a href="https://trello.com/b/ppbUs796/buidlguidlcom-idea-board" target="_blank" rel="noreferrer">
-                <span style={{ marginRight: 4 }}>💡 </span> trello
-              </a>
-              ]{' '}
-            </span>
-          }
+          title=""
+          subTitle={<span>A Self Custodial, Decentralized, Auto-Compounding protocol</span>}
           style={{ cursor: 'pointer' }}
         />
       </div>
@@ -67,7 +66,7 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
         blockExplorer={props.scaffoldAppProviders.targetNetwork.blockExplorer}
         hasContextConnect={true}
       />
-      <FaucetHintButton scaffoldAppProviders={props.scaffoldAppProviders} gasPrice={gasPrice} />
+      {/* <FaucetHintButton scaffoldAppProviders={props.scaffoldAppProviders} gasPrice={gasPrice} /> */}
       {props.children}
     </div>
   );
