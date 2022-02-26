@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { formatEther, parseEther } from '@ethersproject/units';
-import { Button, Divider, Input, List } from 'antd';
+import { Button, Divider, Input, List, Layout } from 'antd';
 import { Address, Balance } from 'eth-components/ant';
 import { transactor } from 'eth-components/functions';
 import { EthComponentsSettingsContext } from 'eth-components/models';
@@ -37,6 +37,7 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
   const tx = transactor(ethComponentsSettings, ethersContext?.signer, gasPrice);
 
   const { mainnetProvider, yourCurrentBalance, price } = props;
+  const { Header, Footer, Sider, Content } = Layout;
 
   return (
     <div>
@@ -44,7 +45,16 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
         ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
       */}
 
-      <div style={{ border: '1px solid #cccccc', padding: 16, width: 400, margin: 'auto', marginTop: 64 }}>
+      <div
+        style={{
+          border: '3px solid #cccccc',
+          padding: 16,
+          width: '80%',
+          margin: 'auto',
+          marginTop: 64,
+          borderRadius: '100px',
+          background: 'rgba(102, 102, 102, 0.22)',
+        }}>
         <h2>Example UI:</h2>
         <h4>purpose: {purpose}</h4>
         <Divider />
@@ -83,14 +93,6 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
         <Divider />
         Your Address:
         <Address address={address} ensProvider={mainnetProvider} fontSize={16} />
-        <Divider />
-        ENS Address Example:
-        <Address
-          address="0x34aA3F359A9D614239015126635CE7732c18fDF3" /* this will show as austingriffith.eth */
-          ensProvider={mainnetProvider}
-          fontSize={16}
-        />
-        <Divider />
         {/* use formatEther to display a BigNumber: */}
         <h2>Your Balance: {yourCurrentBalance ? formatEther(yourCurrentBalance) : '...'}</h2>
         <div>OR</div>

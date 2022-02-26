@@ -6,3 +6,6 @@
 	path = packages/services/optimism
 	url = https://github.com/ethereum-optimism/optimism
 	branch = regenesis/0.4.0
+[submodule "packages/vite-app-ts/src/components/pages/exampleui/packages/vite-app-ts/src/components/pages/exampleui/tokensMetadata/chaindata"]
+	path = packages/vite-app-ts/src/components/pages/exampleui/packages/vite-app-ts/src/components/pages/exampleui/tokensMetadata/chaindata
+	url = https://github.com/FlyWheel-Protocol/chaindata
