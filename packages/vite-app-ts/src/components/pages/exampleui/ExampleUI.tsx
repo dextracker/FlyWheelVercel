@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* */
+import { PlusSquareOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { formatEther, parseEther } from '@ethersproject/units';
-import { Button, Divider, Input, List, Layout } from 'antd';
-import { Address, Balance } from 'eth-components/ant';
+import { List, Layout, Select } from 'antd';
+import { Address } from 'eth-components/ant';
 import { transactor } from 'eth-components/functions';
 import { EthComponentsSettingsContext } from 'eth-components/models';
 import { useContractReader, useEventListener, useGasPrice } from 'eth-hooks';
 import { useEthersContext } from 'eth-hooks/context';
 import { BigNumber } from 'ethers';
 import React, { useState, FC, useContext, ReactNode } from 'react';
+
+import * as joeTokens from './tokensMetadata/JoeTokens.json';
 
 import { useAppContracts } from '~~/config/contractContext';
 import { SetPurposeEvent } from '~~/generated/contract-types/YourContract';
@@ -38,6 +39,39 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
 
   const { mainnetProvider, yourCurrentBalance, price } = props;
   const { Header, Footer, Sider, Content } = Layout;
+  const { Option } = Select;
+  const [avaxTokens, setAvaxTokens] = useState(joeTokens.tokens);
+  const [token0, setToken0] = useState('');
+  const [token1, setToken1] = useState('');
+  const [token0Amount, setToken0Amount] = useState('');
+  const [token1Amount, setToken1Amount] = useState('');
+  const [lpToken, setLpToken] = useState('');
+
+  function onChangeToken0(value: any) {
+    setToken0(value);
+    console.log(`selected ${value}`);
+  }
+
+  function onSearchToken0(val: any) {
+    console.log('search:', val);
+  }
+  function onChangeToken1(value: any) {
+    setToken1(value);
+    console.log(`selected ${value}`);
+  }
+
+  function onSearchToken1(val: any) {
+    console.log('search:', val);
+  }
+  function TokenList() {
+    return (
+      <>
+        {avaxTokens.map((t) => (
+          <Option value={t.address}>{t.symbol}</Option>
+        ))}
+      </>
+    );
+  }
 
   return (
     <div>
@@ -55,107 +89,150 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
           borderRadius: '100px',
           background: 'rgba(102, 102, 102, 0.22)',
         }}>
-        <h2>Example UI:</h2>
-        <h4>purpose: {purpose}</h4>
-        <Divider />
-        <div style={{ margin: 8 }}>
-          <Input
-            onChange={(e): void => {
-              setNewPurpose(e.target.value);
-            }}
-          />
-          <Button
-            style={{ marginTop: 8 }}
-            onClick={async (): Promise<void> => {
-              /* look how you call setPurpose on your contract: */
-              /* notice how you pass a call back for tx updates too */
-              const result = tx?.(yourContract?.setPurpose(newPurpose), (update: any) => {
-                console.log('📡 Transaction Update:', update);
-                if (update && (update.status === 'confirmed' || update.status === 1)) {
-                  console.log(' 🍾 Transaction ' + update.hash + ' finished!');
-                  console.log(
-                    ' ⛽️ ' +
-                      update.gasUsed +
-                      '/' +
-                      (update.gasLimit || update.gas) +
-                      ' @ ' +
-                      parseFloat(update.gasPrice) / 1000000000 +
-                      ' gwei'
+        <h2 style={{ margin: '1em', fontSize: '30px' }}>Initialize Your Compounder</h2>
+
+        {avaxTokens && (
+          <>
+            <div style={{ display: 'inline-block', float: 'left', paddingLeft: '25%', fontSize: '15px' }}>
+              <Select
+                showSearch
+                placeholder="Select a Token"
+                optionFilterProp="children"
+                onChange={onChangeToken0}
+                onSearch={onSearchToken0}
+                filterOption={(input, option) =>
+                  String(option!.children).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }>
+                {avaxTokens.map((t) => {
+                  return (
+                    <>
+                      <Option value={t.address}>
+                        <img
+                          style={{
+                            objectFit: 'cover',
+                            width: '2em',
+                            height: '2em',
+                            borderRadius: '50%',
+                            margin: '0.3em',
+                            display: 'inline-block',
+                          }}
+                          src={t.logoURI}
+                          alt={t.address}
+                        />
+                        {t.symbol}
+                      </Option>
+                    </>
                   );
-                }
-              });
-              console.log('awaiting metamask/web3 confirm result...', result);
-              console.log(await result);
-            }}>
-            Set Purpose!
-          </Button>
-        </div>
-        <Divider />
-        Your Address:
-        <Address address={address} ensProvider={mainnetProvider} fontSize={16} />
-        {/* use formatEther to display a BigNumber: */}
-        <h2>Your Balance: {yourCurrentBalance ? formatEther(yourCurrentBalance) : '...'}</h2>
-        <div>OR</div>
-        <Balance address={address} price={price} />
-        <Divider />
-        <div>🐳 Example Whale Balance:</div>
-        <Balance balance={parseEther('1000')} price={price} address={address} />
-        <Divider />
-        {/* use formatEther to display a BigNumber: */}
-        <h2>Your Balance: {yourCurrentBalance ? formatEther(yourCurrentBalance) : '...'}</h2>
-        <Divider />
-        Your Contract Address:
-        <Address address={yourContract?.address} ensProvider={mainnetProvider} fontSize={16} />
-        <Divider />
-        <div style={{ margin: 8 }}>
-          <Button
-            onClick={(): void => {
-              /* look how you call setPurpose on your contract: */
-              void tx?.(yourContract?.setPurpose('🍻 Cheers'));
-            }}>
-            Set Purpose to &quot;🍻 Cheers&quot;
-          </Button>
-        </div>
-        <div style={{ margin: 8 }}>
-          <Button
-            onClick={(): void => {
-              /*
-              you can also just craft a transaction and send it to the tx() transactor
-              here we are sending value straight to the contract's address:
-            */
-              void tx?.({
-                to: yourContract?.address,
-                value: parseEther('0.001'),
-              });
-              /* this should throw an error about "no fallback nor receive function" until you add it */
-            }}>
-            Send Value
-          </Button>
-        </div>
-        <div style={{ margin: 8 }}>
-          <Button
-            onClick={(): void => {
-              /* look how we call setPurpose AND send some value along */
-              void tx?.(yourContract?.setPurpose('💵 Paying for this one!'));
-              /* this will fail until you make the setPurpose function payable */
-            }}>
-            Set Purpose With Value
-          </Button>
-        </div>
-        <div style={{ margin: 8 }}>
-          <Button
-            onClick={(): void => {
-              /* you can also just craft a transaction and send it to the tx() transactor */
-              void tx?.({
-                to: yourContract?.address,
-                value: parseEther('0.001'),
-                data: yourContract?.interface?.encodeFunctionData?.('setPurpose', ['🤓 Whoa so 1337!']),
-              });
-              /* this should throw an error about "no fallback nor receive function" until you add it */
-            }}>
-            Another Example
-          </Button>
-        </div>
+                })}
+              </Select>
+            </div>
+            <div style={{ display: 'inline-block', float: 'right', paddingRight: '25%' }}>
+              <Select
+                showSearch
+                placeholder="Select a Token"
+                optionFilterProp="children"
+                onChange={onChangeToken1}
+                onSearch={onSearchToken1}
+                filterOption={(input, option) =>
+                  String(option!.children).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }>
+                {avaxTokens.map((t) => {
+                  return (
+                    <>
+                      <Option value={t.address}>
+                        <img
+                          style={{
+                            objectFit: 'cover',
+                            width: '2em',
+                            height: '2em',
+                            borderRadius: '50%',
+                            margin: '0.3em',
+                            display: 'inline-block',
+                          }}
+                          src={t.logoURI}
+                          alt={t.address}
+                        />
+                        {t.symbol}
+                      </Option>
+                    </>
+                  );
+                })}
+              </Select>
+            </div>
+          </>
+        )}
+
+        <div style={{ marginTop: '10%' }} />
+        {token0 && token1 && (
+          <>
+            <div style={{ width: '100%', alignContent: 'center' }}>
+              <h3></h3>
+              <div style={{ float: 'left', marginLeft: '25%' }}>
+                <img
+                  style={{
+                    objectFit: 'cover',
+                    width: '4em',
+                    height: '4em',
+                    borderRadius: '50%',
+                    margin: '0.3em',
+                    display: 'inline-block',
+                  }}
+                  src={avaxTokens.find((t) => t.address === token0)?.logoURI}
+                  alt={token0}
+                />
+              </div>
+              <PlusSquareOutlined style={{ fontSize: '5em' }} />
+              <div style={{ float: 'right', marginRight: '25%' }}>
+                <img
+                  style={{
+                    objectFit: 'cover',
+                    width: '4em',
+                    height: '4em',
+                    borderRadius: '50%',
+                    margin: '0.3em',
+                    display: 'inline-block',
+                  }}
+                  src={avaxTokens.find((t) => t.address === token1)?.logoURI}
+                  alt={token1}
+                />
+              </div>
+            </div>
+            <ArrowDownOutlined style={{ fontSize: '5em', marginTop: '0.3em' }} />
+            <div>
+              <h2 style={{ margin: '1em', fontSize: '20px' }}>Zapping Into</h2>
+              <div style={{ marginRight: '3em' }}>
+                <img
+                  style={{
+                    objectFit: 'cover',
+                    width: '4em',
+                    height: '4em',
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    left: '50%',
+                  }}
+                  src={avaxTokens.find((t) => t.address === token1)?.logoURI}
+                  alt={token1}
+                />
+                <img
+                  style={{
+                    objectFit: 'cover',
+                    width: '4em',
+                    height: '4em',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                  }}
+                  src={avaxTokens.find((t) => t.address === token0)?.logoURI}
+                  alt={token0}
+                />
+              </div>
+              {avaxTokens.find((t) => t.address === token0)?.symbol}/
+              {avaxTokens.find((t) => t.address === token1)?.symbol} LP
+              <div></div>
+            </div>
+
+            <div></div>
+          </>
+        )}
       </div>
 
       {/*
