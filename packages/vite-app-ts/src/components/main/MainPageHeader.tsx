@@ -36,8 +36,8 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
           src="https://uploads.codesandbox.io/uploads/user/ec99cf90-9270-41c2-9b72-7cb10eee778e/WSE8-FlyWheelLogo2.png"
           alt="logo"
           style={{
-            width: '10em',
-            height: '10em',
+            width: '11em',
+            height: '11em',
             display: 'inline-block',
             float: 'left',
             padding: '5px',
@@ -75,18 +75,32 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
    * display the current network on the top left
    */
   let networkDisplay: ReactElement | undefined;
-  if (selectedChainId && selectedChainId !== props.scaffoldAppProviders.targetNetwork.chainId) {
-    const description = (
-      <div>
-        You have <b>{getNetwork(selectedChainId)?.name}</b> selected and you need to be on{' '}
-        <b>{getNetwork(props.scaffoldAppProviders.targetNetwork)?.name ?? 'UNKNOWN'}</b>.
-      </div>
-    );
-    networkDisplay = (
-      <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 90, padding: 16 }}>
-        <Alert message="⚠️ Wrong Network" description={description} type="error" closable={false} />
-      </div>
-    );
+  if (selectedChainId && selectedChainId !== (Number(43114) || Number(250))) {
+    if (selectedChainId !== 250) {
+      const description = (
+        <div>
+          You have <b>{getNetwork(selectedChainId)?.name}</b> selected and you need to be on{' '}
+          <b>{'Fantom or Avalanche'}</b>.
+        </div>
+      );
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 90, padding: 16 }}>
+          <Alert message="⚠️ Wrong Network" description={description} type="error" closable={false} />
+        </div>
+      );
+    } else {
+      const description = (
+        <div>
+          You have <b>{getNetwork(selectedChainId)?.name}</b> selected and you need to be on{' '}
+          <b>{'Fantom or Avalanche'}</b>.
+        </div>
+      );
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 90, padding: 16 }}>
+          <Alert message="⚠️ Wrong Network" description={description} type="error" closable={false} />
+        </div>
+      );
+    }
   } else {
     networkDisplay = (
       <div

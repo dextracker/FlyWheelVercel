@@ -14,10 +14,14 @@ invariant.log('MODE', import.meta.env.MODE, import.meta.env.DEV);
  * This constant is your target network that the app is pointed at
  * 🤚🏽  Set your target frontend network <--- select your target frontend network(localhost, rinkeby, xdai, mainnet)
  */
-
-const targetNetwork: TNetworkNames = import.meta.env.VITE_APP_TARGET_NETWORK as TNetworkNames;
-invariant.log('VITE_APP_TARGET_NETWORK', import.meta.env.VITE_APP_TARGET_NETWORK);
-invariant(NETWORKS[targetNetwork] != null, `Invalid target network: ${targetNetwork}`);
+const targetNetworkFTM: TNetworkNames = 'fantom';
+const targetNetworkAVAX: TNetworkNames = 'avalanche';
+const targetNetwork: TNetworkNames = 'avalanche' as TNetworkNames;
+invariant.log('VITE_APP_TARGET_NETWORK', targetNetworkAVAX);
+invariant(
+  NETWORKS[targetNetworkFTM] != null || NETWORKS[targetNetworkAVAX] != null,
+  `Invalid target network: ${targetNetworkFTM}`
+);
 
 export const TARGET_NETWORK_INFO: TNetworkInfo = NETWORKS[targetNetwork];
 if (DEBUG) console.log(`📡 Connecting to ${TARGET_NETWORK_INFO.name}`);

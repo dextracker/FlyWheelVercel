@@ -11,6 +11,7 @@ export const MainPageMenu: FC<IMainPageMenuProps> = (props) => (
   <Menu
     style={{
       textAlign: 'center',
+      borderRadius: '10px',
     }}
     selectedKeys={[props.route]}
     mode="horizontal">

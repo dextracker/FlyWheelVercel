@@ -11,7 +11,9 @@ export type TNetworkNames =
   | 'goerli'
   | 'xdai'
   | 'matic'
-  | 'mumbai';
+  | 'mumbai'
+  | 'fantom'
+  | 'avalanche';
 
 let hostname = '';
 if (typeof window !== 'undefined') {
@@ -94,5 +96,25 @@ export const NETWORKS: Record<TNetworkNames, TNetworkInfo> = {
     rpcUrl: 'https://rpc-mumbai.maticvigil.com',
     faucet: 'https://faucet.matic.network/',
     blockExplorer: 'https://mumbai-explorer.matic.today/',
+  },
+  fantom: {
+    name: 'fantom',
+    color: '#92D9FA',
+    chainId: 250,
+    price: 1,
+    gasPrice: 1000000000,
+    rpcUrl: 'https://rpc.ftm.tools/',
+    faucet: 'https://faucet.matic.network/',
+    blockExplorer: 'https://ftmscan.com',
+  },
+  avalanche: {
+    name: 'avalanche',
+    color: '#92D9FA',
+    chainId: 43114,
+    price: 1,
+    gasPrice: 1000000000,
+    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+    faucet: '',
+    blockExplorer: 'https://snowtrace.io',
   },
 };
