@@ -101,6 +101,31 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
         </div>
       );
     }
+    if (selectedChainId !== 43114) {
+      const description = (
+        <div>
+          You have <b>{getNetwork(selectedChainId)?.name}</b> selected and you need to be on{' '}
+          <b>{'Fantom or Avalanche'}</b>.
+        </div>
+      );
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 90, padding: 16 }}>
+          <Alert message="⚠️ Wrong Network" description={description} type="error" closable={false} />
+        </div>
+      );
+    } else {
+      const description = (
+        <div>
+          You have <b>{getNetwork(selectedChainId)?.name}</b> selected and you need to be on{' '}
+          <b>{'Fantom or Avalanche'}</b>.
+        </div>
+      );
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: 'absolute', right: 0, top: 90, padding: 16 }}>
+          <Alert message="⚠️ Wrong Network" description={description} type="error" closable={false} />
+        </div>
+      );
+    }
   } else {
     networkDisplay = (
       <div

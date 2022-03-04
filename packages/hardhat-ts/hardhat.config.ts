@@ -121,9 +121,32 @@ const config: HardhatUserConfig = {
         mnemonic: getMnemonic(),
       },
     },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      gasPrice: 1000000000,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+    fantom: {
+      url: 'https://rpc.ftm.tools/',
+      gasPrice: 1000000000,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
   },
   solidity: {
     compilers: [
+      {
+        version: '0.8.9',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: '0.8.6',
         settings: {
