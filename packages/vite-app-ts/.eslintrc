@@ -54,8 +54,9 @@
     "react-hooks/rules-of-hooks": "error",
     "react/display-name": "off",
     "react/jsx-key": "warn",
+    "@typescript-eslint/no-floating-promises": "warn",
     "react-hooks/exhaustive-deps": [
-      "warn",
+      "off",
       {
         "additionalHooks": "(useRecoilCallback)"
       }

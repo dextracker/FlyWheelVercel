@@ -13,8 +13,8 @@ export interface IMainPageContractsProps {
  * 🎛 this scaffolding is full of commonly used components
     this <GenericContract/> component will automatically parse your ABI
     and give you a form to interact with it locally
- * @param props 
- * @returns 
+ * @param props
+ * @returns
  */
 export const MainPageContracts: FC<IMainPageContractsProps> = (props) => {
   const ethersContext = useEthersContext();
