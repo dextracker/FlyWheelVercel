@@ -83,7 +83,6 @@ export const FaucetHintButton: FC<IFaucetButton> = (props) => {
     } else {
       return <></>;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yourLocalBalance, faucetAvailable, ethersContext?.account, faucetTx]);
 
   return <> {faucetHint} </>;
