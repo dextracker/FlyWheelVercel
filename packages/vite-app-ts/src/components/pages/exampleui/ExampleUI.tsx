@@ -12,7 +12,9 @@ import React, { useState, FC, useContext, ReactNode, useCallback, useEffect } fr
 
 import * as joeTokens from './tokensMetadata/JoeTokens.json';
 
+import { JOE_FACTORY, JOE_ROUTER } from '~~/config/appConfig';
 import { useAppContracts } from '~~/config/contractContext';
+import { joePair } from '~~/config/contracts/joePair';
 import { SetPurposeEvent } from '~~/generated/contract-types/YourContract';
 const { Panel } = Collapse;
 const avaxLogo =
@@ -36,6 +38,9 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
   const [setPurposeEvents] = useEventListener<SetPurposeEvent>(yourContract, yourContract?.filters.SetPurpose(), 1);
 
   const signer = ethersContext.signer;
+  const joeFactory = JOE_FACTORY.connect(ethersContext?.signer as ethers.Signer);
+  const joeRouter = JOE_ROUTER.connect(ethersContext?.signer as ethers.Signer);
+
   const address = ethersContext.account ?? '';
 
   const ethComponentsSettings = useContext(EthComponentsSettingsContext);
@@ -46,18 +51,30 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
   const { Header, Footer, Sider, Content } = Layout;
   const { Option } = Select;
   const [avaxTokens] = useState(joeTokens.tokens);
-  const [token0, setToken0] = useState('');
+
+  const [LPTokenAmount, setLPTokenAmount] = useState<any>(null);
+  const [LPtokenBalance, setLPTokenBalance] = useState(0);
+  const [lpTokenConnected, setLPTokenConnected] = useState<any>(null);
+  const [lpToken, setLpToken] = useState('');
+  const [decimalLPToken, setDecimalLPToken] = useState<any>(null);
+
+  const [token2Balance, setToken2Balance] = useState(0);
+  const [token2, setToken2] = useState('');
+  const [token2Connected, setToken2Connected] = useState<any>(null);
+  const [token2Amount, setToken2Amount] = useState<any>(null);
+  const [decimalToken2, setDecimalToken2] = useState<any>(null);
+
   const [token0Balance, setToken0Balance] = useState(0);
-  const [token1Balance, setToken1Balance] = useState(0);
+  const [token0, setToken0] = useState('');
   const [token0Connected, setToken0Connected] = useState<any>(null);
+  const [decimalToken0, setDecimalToken0] = useState<any>(null);
+  const [token0Amount, setToken0Amount] = useState<any>(null);
+
+  const [decimalToken1, setDecimalToken1] = useState<any>(null);
   const [token1, setToken1] = useState('');
   const [token1Connected, setToken1Connected] = useState<any>(null);
-  const [token0Amount, setToken0Amount] = useState<any>(null);
+  const [token1Balance, setToken1Balance] = useState(0);
   const [token1Amount, setToken1Amount] = useState<any>(null);
-  const [LPTokenAmount, setLPTokenAmount] = useState<any>(null);
-  const [decimalToken0, setDecimalToken0] = useState<any>(null);
-  const [decimalToken1, setDecimalToken1] = useState<any>(null);
-  const [lpToken, setLpToken] = useState('');
 
   // force update hack
   const [, updateState] = React.useState();
@@ -79,24 +96,76 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
     const balanceToken0 = await token0Connected.balanceOf(address);
     const decimalToken0 = await token0Connected.decimals();
     console.log('decimalToken0', decimalToken0);
-    const balanceToken1 = await token1Connected.balanceOf(address);
-    const decimalToken1 = await token1Connected.decimals();
-    console.log('decimalToken1', decimalToken1);
-
     setDecimalToken0(decimalToken0);
     setToken0Balance(balanceToken0);
 
+    const balanceToken1 = await token1Connected.balanceOf(address);
+    const decimalToken1 = await token1Connected.decimals();
     setDecimalToken1(decimalToken1);
     setToken1Balance(balanceToken1);
+    console.log('decimalToken1', decimalToken1);
+
+    if (token2) {
+      const balanceToken2 = await token2Connected.balanceOf(address);
+      const decimalToken2 = await token2Connected.decimals();
+      console.log('decimalToken2', decimalToken2);
+      setDecimalToken2(decimalToken2);
+      setToken2Balance(balanceToken2);
+      console.log(joeFactory);
+      const pair = await joeFactory.getPair(token1, token2);
+      setLpToken(pair);
+      const pairContract = new ethers.Contract(pair, joePair, signer);
+      const balanceLP = await pairContract.balanceOf(address);
+      const decimalLPToken = await pairContract.decimals();
+      const reserves = await pairContract.getReserves();
+      setDecimalLPToken(decimalLPToken);
+      setLPTokenBalance(balanceLP);
+      const total = await joeFactory.allPairsLength();
+      console.log('LP BALANCE', balanceLP);
+      console.log('PAIR DECIMALS', decimalLPToken);
+      console.log('ALL PAIRS COUNT', total);
+      console.log('RESERVES', reserves);
+      console.log('PAIR CONTRACT', pairContract);
+    }
+
+    if (lpToken) {
+      console.log('LP', lpToken);
+      const balanceLP = await lpTokenConnected.balanceOf(address);
+      const decimalLPToken = await lpTokenConnected.decimals();
+      console.log('decimalToken2', decimalLPToken);
+      setDecimalLPToken(decimalLPToken);
+      setLPTokenBalance(balanceLP);
+      const total = await joeFactory.allPairsLength();
+      console.log(total);
+
+      const pair = await joeFactory.getPair(token0, token1);
+      console.log(pair);
+      const pairContract = new ethers.Contract(pair, joePair, signer);
+      console.log('PAIR CONTRACT', pairContract);
+      setLPTokenConnected(pairContract);
+      console.log('LP TOKEN CONNECTED', pairContract);
+    }
+
     // forceUpdate();
-  }, [token1Connected, token0Connected]);
+  }, [token1Connected, token0Connected, token2Connected, lpTokenConnected]);
+
+  const getEstimatedLPOut = useCallback(async () => {
+    if (lpTokenConnected) {
+      const reserves = await lpTokenConnected.getReserves();
+      console.log('RESERVES: ', reserves);
+    }
+  }, []);
 
   useEffect(() => {
     forceUpdate();
   }, [forceUpdate]);
   useEffect(() => {
     fetchBalance();
-  }, [token1Connected, token0Connected]);
+  }, [token1Connected, token0Connected, token2Connected, lpTokenConnected, token1, token0, token2]);
+
+  useEffect(() => {
+    getEstimatedLPOut();
+  }, [lpTokenConnected]);
   // useEffect(() => {
   //   const bal = async () => {
   //     if (token0Connected && token1Connected) {
@@ -116,6 +185,10 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
     return new ethers.Contract(address, ERC20Token, signer);
   }
 
+  function getPairContractConnected(address: string): ethers.Contract {
+    return new ethers.Contract(address, joePair, signer);
+  }
+
   function parseBalance(value: number) {
     const val = value.toString();
     console.log('BEFORE: ', val);
@@ -127,12 +200,18 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
     return value;
   }
 
+  const getPairFromFactory = useCallback(async (_token2) => {
+    const pair = await joeFactory.getPair(token1, _token2);
+    console.log('PAIR: ', pair);
+    setLpToken(pair);
+    const connectedPair = getPairContractConnected(pair);
+    setLPTokenConnected(connectedPair);
+  }, []);
+
   function onChangeToken0(value: any) {
     setToken0(value);
     const connected = getContractUnconnected(value);
     setToken0Connected(connected);
-    console.log('TEST: ', getContractUnconnected(value));
-    console.log(`selected ${value}`);
   }
 
   function onSearchToken0(val: any) {
@@ -142,11 +221,27 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
     setToken1(value);
     const connected = getContractUnconnected(value);
     setToken1Connected(connected);
-    console.log('TEST: ', getContractUnconnected(value));
-    console.log(`selected ${value}`);
   }
 
   function onSearchToken1(val: any) {
+    console.log('search:', val);
+  }
+
+  function onChangeToken2(value: any) {
+    setToken2(value);
+    const connected = getContractUnconnected(value);
+    setToken2Connected(connected);
+    // connect LP token
+    let pair;
+    getPairFromFactory(value).then((v) => {
+      pair = v;
+      console.log('PAIR onChange', v);
+    });
+
+    getEstimatedLPOut();
+  }
+
+  function onSearchToken2(val: any) {
     console.log('search:', val);
   }
 
@@ -568,82 +663,165 @@ export const ExampleUI: FC<IExampleUIProps> = (props) => {
                                   );
                                 })}
                               </Select>
+                              <Select
+                                showSearch
+                                placeholder="Select a Token"
+                                optionFilterProp="children"
+                                onChange={onChangeToken2}
+                                onSearch={onSearchToken2}
+                                filterOption={(input, option) =>
+                                  String(option!.children).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }>
+                                {avaxTokens.map((t) => {
+                                  return (
+                                    <>
+                                      <Option value={t.address}>
+                                        <img
+                                          style={{
+                                            objectFit: 'cover',
+                                            width: '2em',
+                                            height: '2em',
+                                            borderRadius: '50%',
+                                            margin: '0.3em',
+                                            display: 'inline-block',
+                                          }}
+                                          src={t.logoURI}
+                                          alt={t.address}
+                                        />
+                                        {t.symbol}
+                                      </Option>
+                                    </>
+                                  );
+                                })}
+                              </Select>
                             </div>
 
-                            {token1 && (
-                              <>
-                                <Input
-                                  type="number"
-                                  style={{ maxWidth: '30%' }}
-                                  placeholder="Amount"
-                                  prefix={
+                            {token1 && token2 && (
+                              <></>
+                              // <>
+                              //   <Input
+                              //     type="number"
+                              //     style={{ maxWidth: '30%' }}
+                              //     placeholder="Amount"
+                              //     prefix={
+                              //       <img
+                              //         style={{
+                              //           objectFit: 'cover',
+                              //           width: '2em',
+                              //           height: '2em',
+                              //           borderRadius: '50%',
+                              //           margin: '0.3em',
+                              //           display: 'inline-block',
+                              //         }}
+                              //         src={avaxTokens.find((t) => t.address === token1)?.logoURI}
+                              //         alt={token1}
+                              //       />
+                              //     }
+                              //     suffix={
+                              //       <>
+                              //         Max:
+                              //         <a
+                              //           onClick={(e) => {
+                              //             setToken1Amount(Number(token1Balance / 10 ** decimalToken1).toFixed(5));
+                              //           }}>
+                              //           {Number(token1Balance / 10 ** decimalToken1).toFixed(2)}
+                              //         </a>
+                              //       </>
+                              //     }
+                              //     onChange={(e) => setToken1Amount(e.target.value)}
+                              //     value={token1Amount}
+                              //   />
+                              //   <Input
+                              //     type="number"
+                              //     style={{ maxWidth: '30%' }}
+                              //     placeholder="Amount"
+                              //     prefix={
+                              //       <img
+                              //         style={{
+                              //           objectFit: 'cover',
+                              //           width: '2em',
+                              //           height: '2em',
+                              //           borderRadius: '50%',
+                              //           margin: '0.3em',
+                              //           display: 'inline-block',
+                              //         }}
+                              //         src={avaxTokens.find((t) => t.address === token2)?.logoURI}
+                              //         alt={token2}
+                              //       />
+                              //     }
+                              //     suffix={
+                              //       <>
+                              //         Max:
+                              //         <a
+                              //           onClick={(e) => {
+                              //             setToken1Amount(Number(token2Balance / 10 ** decimalToken2).toFixed(5));
+                              //           }}>
+                              //           {Number(token2Balance / 10 ** decimalToken2).toFixed(2)}
+                              //         </a>
+                              //       </>
+                              //     }
+                              //     onChange={(e) => setToken2Amount(e.target.value)}
+                              //     value={token2Amount}
+                              //   />
+                              // </>
+                            )}
+                          </div>
+                          <ArrowDownOutlined style={{ fontSize: '5em', marginTop: '0.3em' }} />
+
+                          <div>
+                            <h2 style={{ margin: '1em', fontSize: '20px' }}>Zapping Into</h2>
+                            <h3>
+                              {avaxTokens.find((t) => t.address === token1)?.symbol}/
+                              {avaxTokens.find((t) => t.address === token2)?.symbol} LP
+                            </h3>
+                            <div style={{ marginRight: '3em' }}>
+                              <Input
+                                type="number"
+                                style={{ maxWidth: '60%' }}
+                                placeholder="Amount"
+                                prefix={
+                                  <>
                                     <img
                                       style={{
                                         objectFit: 'cover',
                                         width: '2em',
                                         height: '2em',
                                         borderRadius: '50%',
-                                        margin: '0.3em',
-                                        display: 'inline-block',
+                                        left: '50%',
                                       }}
                                       src={avaxTokens.find((t) => t.address === token1)?.logoURI}
                                       alt={token1}
                                     />
-                                  }
-                                  suffix={
-                                    <>
-                                      Max:
-                                      <a
-                                        onClick={(e) => {
-                                          setToken1Amount(Number(token1Balance / 10 ** decimalToken1).toFixed(5));
-                                        }}>
-                                        {Number(token1Balance / 10 ** decimalToken1).toFixed(2)}
-                                      </a>
-                                    </>
-                                  }
-                                  onChange={(e) => setToken1Amount(e.target.value)}
-                                  value={token1Amount}
-                                />
-                              </>
-                            )}
-                          </div>
-                          <ArrowDownOutlined style={{ fontSize: '5em', marginTop: '0.3em' }} />
-                          <div>
-                            <h2 style={{ margin: '1em', fontSize: '20px' }}>Zapping Into</h2>
-                            <div style={{ marginRight: '3em' }}>
-                              <img
-                                style={{
-                                  objectFit: 'cover',
-                                  width: '4em',
-                                  height: '4em',
-                                  borderRadius: '50%',
-                                  position: 'absolute',
-                                  left: '50%',
-                                }}
-                                src={avaxTokens.find((t) => t.address === token1)?.logoURI}
-                                alt={token1}
-                              />
-                              <img
-                                style={{
-                                  objectFit: 'cover',
-                                  width: '4em',
-                                  height: '4em',
-                                  borderRadius: '50%',
-                                  display: 'inline-block',
-                                }}
-                                src={avaxTokens.find((t) => t.address === token0)?.logoURI}
-                                alt={token0}
+                                    <img
+                                      style={{
+                                        objectFit: 'cover',
+                                        width: '2em',
+                                        height: '2em',
+                                        borderRadius: '50%',
+                                        display: 'inline-block',
+                                      }}
+                                      src={avaxTokens.find((t) => t.address === token2)?.logoURI}
+                                      alt={token2}
+                                    />
+                                  </>
+                                }
+                                suffix={
+                                  <>
+                                    <h2 style={{ margin: '0.1em' }}>Estimated LP Received:</h2>
+                                    <a
+                                      onClick={(e) => {
+                                        setLPTokenAmount(Number(LPtokenBalance / 10 ** decimalLPToken).toFixed(5));
+                                      }}>
+                                      {Number(LPtokenBalance / 10 ** decimalLPToken).toFixed(2)}
+                                    </a>
+                                  </>
+                                }
+                                onChange={(e) => setLPTokenAmount(e.target.value)}
+                                value={LPTokenAmount}
                               />
                             </div>
-                            {avaxTokens.find((t) => t.address === token0)?.symbol}/
-                            {avaxTokens.find((t) => t.address === token1)?.symbol} LP
+
                             <div></div>
-                          </div>
-                          {}
-                          <div>
-                            <h2>LP Tokens Recieved</h2>
-                            {/* {ethers.utils.formatEther(token0Balance.toString())}
-              {ethers.utils.formatEther(token1Balance.toString())} */}
                           </div>
                         </>
                       )}

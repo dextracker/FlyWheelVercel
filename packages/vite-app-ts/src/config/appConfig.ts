@@ -1,8 +1,11 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { TNetworkInfo, TEthersProvider } from 'eth-hooks/models';
+import { ethers } from 'ethers';
 import { invariant } from 'ts-invariant';
 
 import { NETWORKS, TNetworkNames } from '../models/constants/networks';
+
+import { joeFactory, joeRouter } from './contracts/joeRouter';
 
 export const DEBUG = true;
 invariant.log('MODE', import.meta.env.MODE, import.meta.env.DEV);
@@ -85,9 +88,7 @@ export const SUBGRAPH_URI = 'http://localhost:8000/subgraphs/name/scaffold-eth/y
 // -------------------
 // attempt to connect to our own scaffold eth rpc and if that fails fall back to infura...
 const mainnetScaffoldEthProvider = new StaticJsonRpcProvider(import.meta.env.VITE_RPC_MAINNET);
-const mainnetInfura = new StaticJsonRpcProvider(
-  `${import.meta.env.VITE_RPC_MAINNET_INFURA}/${import.meta.env.VITE_KEY_INFURA}`
-);
+
 // const mainnetProvider = new InfuraProvider("mainnet",import.meta.env.VITE_KEY_INFURA);
 
 // 🚊 your mainnet provider
@@ -102,3 +103,9 @@ export const LOCAL_PROVIDER: TEthersProvider | undefined =
   TARGET_NETWORK_INFO === NETWORKS.localhost && import.meta.env.DEV
     ? new StaticJsonRpcProvider(NETWORKS.localhost.rpcUrl)
     : undefined;
+
+const joeFactoryAddress = '0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10';
+const joeRouterAddress = '0x60aE616a2155Ee3d9A68541Ba4544862310933d4';
+
+export const JOE_FACTORY = new ethers.Contract(joeFactoryAddress, joeFactory);
+export const JOE_ROUTER = new ethers.Contract(joeRouterAddress, joeRouter);
